@@ -1,0 +1,60 @@
+---
+title: "Amazon Book Reviews Project"
+author: "Brody Coyne"
+date: "2022-11-06"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+library(tidyverse)
+library(factoextra)
+```
+
+Importing the data and showing the first few rows.
+```{r }
+mydata<-read.csv("Amazon_top100_bestselling_books_2009to2021.csv")
+mydata <- na.omit(mydata)
+head(mydata)
+```
+
+Showing the summary statistics for the price and ratings for the book.
+```{r}
+summary(mydata$price)
+summary(mydata$ratings)
+```
+
+This histogram for the price of the books shows that there is a significant outlier, which is the $144 book. It also shows that there is a large portion of books which are in the $10-20 range.
+```{r}
+hist(mydata$price)
+```
+
+The ratings are negatively skewed. I found this interesting because there are much higher average ratings than I would have thought, which creates this significant negative skew. 
+```{r}
+hist(mydata$ratings)
+```
+
+This shows the price of the books separated by each year. I found this very interesting because I would have assumed that over the years there would be a significant increase in the price of the books. However, there was no noticeable increase in price, if anything it seems like prices may have decreased a bit.
+```{r}
+ggplot(data = mydata) + 
+  geom_point(mapping = aes(x = price, y = year))
+```
+
+Showing the price of the books compared to the ratings on Amazon. This scatter plot doesn't give any obvious conclusions in my opinion.
+```{r}
+ggplot(data = mydata) + 
+  geom_point(mapping = aes(x = ratings, y = price))
+```
+
+Because I did not see any obvious conclusions I wanted to perform a cluster analysis to see if it could give me a new perspective.
+```{r}
+cluster<-mydata[c(2,6)]
+fviz_nbclust(cluster, kmeans, method = "silhouette")
+```
+
+What I got from these two clusters is that if the book was on the lower end of the price scale, there was a large range of ratings, as seen in the first cluster. But if the price was on the higher end, the ratings were almost always on the higher ends as well. What I got from this analysis is that if an author wants a book to make the top 100 selling books on Amazon for the year it has to be one of two things, affordable or relatively highly rated.
+```{r}
+k3<-kmeans(cluster, centers = 2, nstart = 25)
+fviz_cluster(k3, data = cluster)
+```
+
